@@ -41,6 +41,21 @@ class Window:
 
         return located_bbox
 
+    def locate_all(self, img_to_locate):
+        self_screenshot = self.take_screenshot()
+        all_located = agui.locateAll(img_to_locate, self_screenshot, confidence=0.6, grayscale=True)
+
+        located_bboxes = [
+            BoundingBox(
+                left=left + self.x,
+                top=top + self.y,
+                width=width,
+                height=height 
+            ) for left, top, width, height in all_located
+        ]
+
+        return located_bboxes
+
 @dataclass
 class BoundingBox:
     left: int
@@ -68,8 +83,10 @@ window_geometry = yaml.load(window_geometry_raw, Loader=Loader)
 
 window = Window(**window_geometry)
 im = window.take_screenshot()
+im.save(os.path.join(data_dir, 'screenshot.png'))
 
 knife_image = Image.open(os.path.join(data_dir, 'Knife.png'))
+unstrung_maple_bow_image = Image.open(os.path.join(data_dir, 'MapleLongbowUnstrung.png'))
 
 # left, top, width, height = agui.locate(knife_image, im)
 # agui.moveTo(window.x + 2 + left, window.y + top + 3, duration=1, tween=agui.easeInElastic)
@@ -77,4 +94,5 @@ knife_image = Image.open(os.path.join(data_dir, 'Knife.png'))
 
 knife_bbox = window.locate(knife_image)
 knife_bbox.move_to_center()
+print(len(window.locate_all(unstrung_maple_bow_image)))
 #agui.moveTo(x=knife_bbox.centroid.x, y=knife_bbox.centroid.y, duration=2, tween=agui.easeInElastic)
